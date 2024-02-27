@@ -7,7 +7,7 @@ prog_wait = 1
 programming = 2
 prog_stabilizing = 3
 prog_done = 4
-half_period = 12.5e-9
+half_period = 1e-7
 
 # Pin configuration
 
