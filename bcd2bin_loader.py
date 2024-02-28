@@ -18,6 +18,7 @@ PROG_WE = "P8_9"
 PROG_DIN = "P8_10"
 PROG_DOUT = "P8_11"
 PROG_WE_O = "P8_12"
+gpio = "P8_15"
 
 # Setup GPIO
 GPIO.setup(PROG_CLK, GPIO.OUT)
@@ -27,6 +28,7 @@ GPIO.setup(PROG_WE, GPIO.OUT)
 GPIO.setup(PROG_DIN, GPIO.OUT)
 GPIO.setup(PROG_DOUT, GPIO.IN)
 GPIO.setup(PROG_WE_O, GPIO.IN)
+GPIO.setup(gpio, GPIO.IN)
 
 # Initialize
 GPIO.output(PROG_RST, GPIO.HIGH)
@@ -53,27 +55,28 @@ def send_bit(bit):
 
 # Load the bitstream file
 bitstream = open("/home/jae/order/bcd2bin/bitgen.out", "rb")
-    # byte = bitstream.read(1)
-    # while byte:
-    #     # Send each bit in the byte (assuming MSB first)
-    #     for i in range(7, -1, -1):
-    #         bit = (byte[0] >> i) & 1
-    #         send_bit(bit)
-    #     byte = bitstream.read(1)
 
-#while (GPIO.input(PROG_DONE) == GPIO.LOW):
-byte = bitstream.read(1)
-while byte:
-    # Send each bit in the byte (assuming MSB first)
-    for i in range(7, -1, -1):
-        bit = (byte[0] >> i) & 1
-        send_bit(bit)
+GPIO.output(PROG_RST, GPIO.LOW)
+
+# Waits until gpio pin goes high
+# Should not be needed
+while (GPIO.input(gpio) == GPIO.LOW):
+    time.sleep(1)
+
+if (GPIO.input(gpio) == GPIO.HIGH):
     byte = bitstream.read(1)
+    while byte:
+        # Send each bit in the byte (assuming MSB first)
+        for i in range(7, -1, -1):
+            bit = (byte[0] >> i) & 1
+            send_bit(bit)
+        byte = bitstream.read(1)
 
-GPIO.output(PROG_DONE, GPIO.HIGH)
+    GPIO.output(PROG_DONE, GPIO.HIGH)
     
 
-# Check if programming was successful
+# Check if programming was successful?
+
 
 
 if GPIO.input(PROG_DONE):
