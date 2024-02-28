@@ -10,6 +10,8 @@ prog_done = 4
 half_period = 1e-7
 
 # Pin configuration
+# general clock supplied by PWM
+# P8.19 corresponds to folder: /sys/class/pwm/pwm-6:0
 
 PROG_CLK = "P8_14" # clock probably should be dealt with PWM
 PROG_RST = "P8_7"
@@ -63,7 +65,9 @@ GPIO.output(PROG_RST, GPIO.LOW)
 while (GPIO.input(gpio) == GPIO.LOW):
     time.sleep(1)
 
+
 if (GPIO.input(gpio) == GPIO.HIGH):
+    print("gpio pin set high")
     byte = bitstream.read(1)
     while byte:
         # Send each bit in the byte (assuming MSB first)

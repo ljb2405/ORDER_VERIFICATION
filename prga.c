@@ -225,7 +225,7 @@ void main()
     // reg_mprj_datal = 0x00000000;
     // reg_mprj_datah = 0x00000000;
 
-        print("Pin configuration succeeeded");
+    print("Pin configuration succeeeded");
 
 	// while (1) {
 
@@ -244,7 +244,32 @@ void main()
 	// 	delay(8000000);
 
     // }
+    while (reg_mprj_datah != 0x00000004)
+    {
+        delay(8000000);
+    }
+    
+    // If the gpio[34] accepts PROG_DONE properly,
+    // the board starts blinking
+    if (reg_mprj_datah == 0x00000004)
+    {
+        while (1) {
 
+            reg_gpio_out = 1; // OFF
+    //     reg_mprj_datal = 0x00000000;
+    //     reg_mprj_datah = 0x00000000;
 
+	// 	//delay(800000);
+		    delay(8000000);
+
+            reg_gpio_out = 0;  // ON
+    //     reg_mprj_datah = 0x0000003f;
+    //     reg_mprj_datal = 0xffffffff;
+
+	// 	//delay(800000);
+		    delay(8000000);
+
+    // }
+    }
 }
 
