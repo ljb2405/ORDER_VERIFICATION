@@ -2,18 +2,13 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-reset = 0
-prog_wait = 1
-programming = 2
-prog_stabilizing = 3
-prog_done = 4
-half_period = 1e-7
+half_period = 5e-5 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 
 # Pin configuration
 # general clock supplied by PWM
-# P8.19 corresponds to folder: /sys/class/pwm/pwm-6:0
-
-PROG_CLK = "P8_14" # clock probably should be dealt with PWM
+# P8.19 corresponds to folder: /sys/class/pwm/pwmchip7/pwm-7:1
+# clock is dealt in PWM with clock.sh
+PROG_CLK = "P8_14"
 PROG_RST = "P8_7"
 PROG_DONE = "P8_8"
 PROG_WE = "P8_9"
@@ -39,21 +34,15 @@ GPIO.output(PROG_WE, GPIO.LOW)
 GPIO.output(PROG_WE, GPIO.LOW)
 GPIO.output(PROG_CLK, GPIO.LOW)
 
-# Initialize variables
-state = reset
-prog_progress = 0
-wait_count = 0
-
-
-
 # Function to send a single bit to the FPGA
 def send_bit(bit):
-    GPIO.output(PROG_WE, GPIO.HIGH)
     GPIO.output(PROG_DIN, bit)
+    GPIO.output(PROG_WE, GPIO.HIGH)
     GPIO.output(PROG_CLK, GPIO.HIGH)
     time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
     GPIO.output(PROG_CLK, GPIO.LOW)
     GPIO.output(PROG_WE, GPIO.LOW)
+    time.sleep(half_period)
 
 # Load the bitstream file
 bitstream = open("/home/jae/order/bcd2bin/bitgen.out", "rb")
@@ -80,7 +69,7 @@ if (GPIO.input(gpio) == GPIO.HIGH):
     
 
 # Check if programming was successful?
-
+# Possibly utilize prog_dout / prog_we_o
 
 
 if GPIO.input(PROG_DONE):
