@@ -27,7 +27,7 @@ GPIO.setup(PROG_DOUT, GPIO.IN)
 GPIO.setup(PROG_WE_O, GPIO.IN)
 GPIO.setup(gpio, GPIO.IN)
 
-# Initialize
+# Initialize Outputs
 GPIO.output(PROG_RST, GPIO.HIGH)
 GPIO.output(PROG_DONE, GPIO.LOW)
 GPIO.output(PROG_WE, GPIO.LOW)
