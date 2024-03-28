@@ -210,10 +210,7 @@ void main()
     // reg_mprj_io_36 = GPIO_MODE_USER_STD_INPUT_NOPULL;   // clk
     // reg_mprj_io_37 = GPIO_MODE_USER_STD_INPUT_NOPULL;   // prog_clk
         
-	
-    
-    
-    reg_uart_enable = 1;
+
     
     /* Apply configuration */
 	reg_mprj_xfer = 1;
@@ -222,9 +219,9 @@ void main()
     // set GPIO to 1 to signal the external bitstream loader
     reg_gpio_out = 1;
     reg_gpio_out = 1;
-    // Reset the IOs
-    reg_mprj_datal = 0x00000000;
-    reg_mprj_datah = 0x00000000;
+    // // Reset the IOs
+    // reg_mprj_datal = 0x00000000;
+    // reg_mprj_datah = 0x00000000;
 
     print("Pin configuration succeeeded");
 
@@ -248,27 +245,28 @@ void main()
     // If the gpio[34] accepts PROG_DONE properly,
     // the board starts blinking
    
-    while (1) {
-        if (reg_mprj_datah == 0x00000004)
-        {
-            reg_gpio_out = 1; // OFF
-    //     reg_mprj_datal = 0x00000000;
-    //     reg_mprj_datah = 0x00000000;
+    // while (1) {
+    //     if (reg_mprj_datah == 0x00000004)
+    //     {
+    //         reg_gpio_out = 1; // OFF
+    // //     reg_mprj_datal = 0x00000000;
+    // //     reg_mprj_datah = 0x00000000;
 
-	// 	//delay(800000);
-		    delay(8000000);
+	// // 	//delay(800000);
+	// 	    delay(8000000);
 
-            reg_gpio_out = 0;  // ON
-    //     reg_mprj_datah = 0x0000003f;
-    //     reg_mprj_datal = 0xffffffff;
+    //         reg_gpio_out = 0;  // ON
+    // //     reg_mprj_datah = 0x0000003f;
+    // //     reg_mprj_datal = 0xffffffff;
 
-	// 	//delay(800000);
-		    delay(8000000);
+	// // 	//delay(800000);
+	// 	    delay(8000000);
 
+    // // }
     // }
-    }
-    else {
-        reg_gpio_out = 1; // OFF
-        delay(8000000);
-    }
+    // else {
+    //     reg_gpio_out = 1; // OFF
+    //     delay(8000000);
+    // }
 }
+
