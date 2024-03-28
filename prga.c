@@ -55,16 +55,11 @@ void configure_io()
     //  GPIO 0 is turned off to prevent toggling the debug pin; For debug, make this an output and
     //  drive it externally to ground.
 
-    reg_mprj_io_0 = GPIO_MODE_MGMT_STD_ANALOG;
+    reg_mprj_io_0 = GPIO_MODE_USER_STD_OUTPUT; // prog_we_o
 
     // Changing configuration for IO[1-4] will interfere with programming flash. if you change them,
     // You may need to hold reset while powering up the board and initiating flash to keep the process
     // configuring these IO from their default values.
-
-    reg_mprj_io_1 = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_2 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
-    reg_mprj_io_3 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
-    reg_mprj_io_4 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
 
     // -------------------------------------------
 
@@ -102,6 +97,11 @@ void configure_io()
     reg_mprj_io_35 = GPIO_MODE_USER_STD_INPUT_NOPULL; // prog_din
     reg_mprj_io_36 = GPIO_MODE_USER_STD_INPUT_NOPULL; // clk
     reg_mprj_io_37 = GPIO_MODE_USER_STD_INPUT_NOPULL; // prog_clk
+    reg_mprj_io_1 = GPIO_MODE_USER_STD_OUTPUT; // prog_dout
+    reg_mprj_io_2 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
+    reg_mprj_io_3 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
+    reg_mprj_io_4 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;
+
 
     // Initiate the serial transfer to configure IO
     reg_mprj_xfer = 1;
@@ -161,8 +161,6 @@ void main()
     reg_gpio_mode0 = 1;
     reg_gpio_ien = 1;
     reg_gpio_oe = 1;
-
-    configure_io();
     
     reg_gpio_out = 0;
     reg_gpio_out = 0;
@@ -210,7 +208,10 @@ void main()
     // reg_mprj_io_36 = GPIO_MODE_USER_STD_INPUT_NOPULL;   // clk
     // reg_mprj_io_37 = GPIO_MODE_USER_STD_INPUT_NOPULL;   // prog_clk
         
-
+	
+    
+    
+    // reg_uart_enable = 1;
     
     /* Apply configuration */
 	reg_mprj_xfer = 1;
@@ -219,10 +220,10 @@ void main()
     // set GPIO to 1 to signal the external bitstream loader
     reg_gpio_out = 1;
     reg_gpio_out = 1;
-    // // Reset the IOs
+    // Reset the IOs
     // reg_mprj_datal = 0x00000000;
     // reg_mprj_datah = 0x00000000;
-
+    configure_io();
     print("Pin configuration succeeeded");
 
 	// while (1) {
@@ -263,10 +264,11 @@ void main()
 	// 	    delay(8000000);
 
     // // }
-    // }
-    // else {
-    //     reg_gpio_out = 1; // OFF
-    //     delay(8000000);
-    // }
+    //     }
+    //     else {
+    //         reg_gpio_out = 1; // OFF
+    //         delay(8000000);
+    //     }
+    // }   
 }
 

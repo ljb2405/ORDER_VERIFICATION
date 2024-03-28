@@ -4,6 +4,8 @@ import time
 # Parameters
 half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 sleepTime100Cycle = half_period * 2 * 100
+BS_NUM_QWORDS       = 422 # Bitstream length
+BS_WORD_SIZE        = 1 # Byte
 # Pin configuration
 # general clock supplied by PWM
 # P8.19 corresponds to folder: /sys/class/pwm/pwmchip7/pwm-7:1
@@ -16,6 +18,9 @@ PROG_DIN = "P8_10"
 PROG_DOUT = "P8_11"
 PROG_WE_O = "P8_12"
 gpio = "P8_14"
+
+# Global Variables
+prog_fragments = 0
 
 # Setup GPIO
 GPIO.setup(PROG_CLK, GPIO.OUT)
@@ -44,6 +49,15 @@ def send_bit(bit):
     GPIO.output(PROG_WE, GPIO.LOW)
     time.sleep(half_period)
 
+def prog_sleep(cycles):
+    count = 0
+    while (count < cycles):
+        GPIO.output(PROG_CLK, GPIO.HIGH)
+        count += 1
+        time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
+        GPIO.output(PROG_CLK, GPIO.LOW)
+        time.sleep(half_period)
+
 # Load the bitstream file
 bitstream = open("/home/jae/order/bcd2bin/bitgen.out", "rb")
 
@@ -58,12 +72,22 @@ while (GPIO.input(gpio) == GPIO.LOW):
 if (GPIO.input(gpio) == GPIO.HIGH):
     print("gpio pin set high")
     byte = bitstream.read(1)
-    while byte:
-        # Send each bit in the byte (assuming MSB first)
+    prog_progress = 0
+
+    while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
+    # Send each bit in the byte (assuming MSB first)
         for i in range(7, -1, -1):
             bit = (byte[0] >> i) & 1
             send_bit(bit)
+        
+        prog_progress += BS_WORD_SIZE
         byte = bitstream.read(1)
+        # ## Potentially add error checking mechanism using dout?
+        # prog_sleep(10)
+    # Stabilizing Phase
+
+    while prog_fragments:
+        prog_sleep(1)
 
     GPIO.output(PROG_DONE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
