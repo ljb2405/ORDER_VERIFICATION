@@ -21,6 +21,10 @@ gpio = "P8_14"
 
 # Global Variables
 prog_fragments = 0
+prog_we = 0
+prog_we_prev = 0
+prog_we_o = 0
+prog_we_o_prev = 0
 
 # Setup GPIO
 GPIO.setup(PROG_CLK, GPIO.OUT)
@@ -39,14 +43,38 @@ GPIO.output(PROG_WE, GPIO.LOW)
 GPIO.output(PROG_WE, GPIO.LOW)
 GPIO.output(PROG_CLK, GPIO.LOW)
 
+# Computes prog_fragment for programming stabilization purposes
+def compute_fragments():
+    prog_we_prev = prog_we
+    prog_we_o_prev = prog_we_o
+    prog_we_o = GPIO.input(PROG_WE_O)
+
+    if (prog_we_prev and ~prog_we) and ~(prog_we_o_prev and ~prog_we_o):
+        prog_fragments += 1
+    elif (~(prog_we_prev and ~prog_we) and (prog_we_o_prev and ~prog_we_o)):
+        prog_fragments -= 1
+    
 # Function to send a single bit to the FPGA
 def send_bit(bit):
     GPIO.output(PROG_DIN, bit)
+    prog_we_prev = prog_we
+
     GPIO.output(PROG_WE, GPIO.HIGH)
+    prog_we = 1
     GPIO.output(PROG_CLK, GPIO.HIGH)
+
+    prog_we_o_prev = prog_we_o
+    prog_we_o = GPIO.input(PROG_WE_O)
+    
     time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
-    GPIO.output(PROG_CLK, GPIO.LOW)
+
+    if (prog_we_prev and ~prog_we) and ~(prog_we_o_prev and ~prog_we_o):
+        prog_fragments += 1
+    elif (~(prog_we_prev and ~prog_we) and (prog_we_o_prev and ~prog_we_o)):
+        prog_fragments -= 1
+    
     GPIO.output(PROG_WE, GPIO.LOW)
+    GPIO.output(PROG_CLK, GPIO.LOW)
     time.sleep(half_period)
 
 def prog_sleep(cycles):
@@ -88,6 +116,7 @@ if (GPIO.input(gpio) == GPIO.HIGH):
 
     while prog_fragments:
         prog_sleep(1)
+        compute_fragments()
 
     GPIO.output(PROG_DONE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
