@@ -2,20 +2,20 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-5 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
-
+half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+sleepTime100Cycle = half_period * 2 * 100
 # Pin configuration
 # general clock supplied by PWM
 # P8.19 corresponds to folder: /sys/class/pwm/pwmchip7/pwm-7:1
 # clock is dealt in PWM with clock.sh
-PROG_CLK = "P8_14"
+PROG_CLK = "P8_13"
 PROG_RST = "P8_7"
 PROG_DONE = "P8_8"
 PROG_WE = "P8_9"
 PROG_DIN = "P8_10"
 PROG_DOUT = "P8_11"
 PROG_WE_O = "P8_12"
-gpio = "P8_15"
+gpio = "P8_14"
 
 # Setup GPIO
 GPIO.setup(PROG_CLK, GPIO.OUT)
@@ -27,7 +27,7 @@ GPIO.setup(PROG_DOUT, GPIO.IN)
 GPIO.setup(PROG_WE_O, GPIO.IN)
 GPIO.setup(gpio, GPIO.IN)
 
-# Initialize
+# Initialize Outputs
 GPIO.output(PROG_RST, GPIO.HIGH)
 GPIO.output(PROG_DONE, GPIO.LOW)
 GPIO.output(PROG_WE, GPIO.LOW)
@@ -66,7 +66,7 @@ if (GPIO.input(gpio) == GPIO.HIGH):
         byte = bitstream.read(1)
 
     GPIO.output(PROG_DONE, GPIO.HIGH)
-    
+    time.sleep(sleepTime100Cycle)
 
 # Check if programming was successful?
 # Possibly utilize prog_dout / prog_we_o
@@ -76,4 +76,3 @@ if GPIO.input(PROG_DONE):
     print("FPGA programming successful!")
 else:
     print("FPGA programming failed.")
-

@@ -222,8 +222,9 @@ void main()
     // set GPIO to 1 to signal the external bitstream loader
     reg_gpio_out = 1;
     reg_gpio_out = 1;
-    // reg_mprj_datal = 0x00000000;
-    // reg_mprj_datah = 0x00000000;
+    // Reset the IOs
+    reg_mprj_datal = 0x00000000;
+    reg_mprj_datah = 0x00000000;
 
     print("Pin configuration succeeeded");
 
@@ -244,17 +245,12 @@ void main()
 	// 	delay(8000000);
 
     // }
-    while (reg_mprj_datah != 0x00000004)
-    {
-        delay(8000000);
-    }
-    
     // If the gpio[34] accepts PROG_DONE properly,
     // the board starts blinking
-    if (reg_mprj_datah == 0x00000004)
-    {
-        while (1) {
-
+   
+    while (1) {
+        if (reg_mprj_datah == 0x00000004)
+        {
             reg_gpio_out = 1; // OFF
     //     reg_mprj_datal = 0x00000000;
     //     reg_mprj_datah = 0x00000000;
@@ -271,5 +267,8 @@ void main()
 
     // }
     }
+    else {
+        reg_gpio_out = 1; // OFF
+        delay(8000000);
+    }
 }
-
