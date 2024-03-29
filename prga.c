@@ -65,8 +65,8 @@ void configure_io()
 
     reg_mprj_io_5 = GPIO_MODE_MGMT_STD_INPUT_NOPULL;     // UART Rx
     reg_mprj_io_6 = GPIO_MODE_MGMT_STD_OUTPUT;           // UART Tx
-    reg_mprj_io_7 = GPIO_MODE_MGMT_STD_OUTPUT;           // prog_we_o
-    reg_mprj_io_8 = GPIO_MODE_MGMT_STD_OUTPUT;           // prog_dout
+    reg_mprj_io_7 = GPIO_MODE_MGMT_STD_OUTPUT;           
+    reg_mprj_io_8 = GPIO_MODE_MGMT_STD_OUTPUT;          
     reg_mprj_io_9 = GPIO_MODE_USER_STD_BIDIRECTIONAL;    // N.C
     reg_mprj_io_10 = GPIO_MODE_USER_STD_BIDIRECTIONAL;   // N.C
     reg_mprj_io_11 = GPIO_MODE_USER_STD_BIDIRECTIONAL;   // w_impl_bin[6]

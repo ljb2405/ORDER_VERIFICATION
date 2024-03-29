@@ -2,7 +2,7 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+half_period = 5e-2 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 sleepTime100Cycle = half_period * 2 * 100
 BS_NUM_QWORDS       = 422 # Bitstream length
 BS_WORD_SIZE        = 1 # Byte
@@ -72,6 +72,7 @@ def send_bit(bit):
 
     GPIO.output(PROG_WE, GPIO.HIGH)
     prog_we = 1
+    time.sleep(half_period/2)
     GPIO.output(PROG_CLK, GPIO.HIGH)
 
     prog_we_o_prev = prog_we_o
@@ -83,10 +84,12 @@ def send_bit(bit):
         prog_fragments += 1
     elif (~(prog_we_prev & ~prog_we) & (prog_we_o_prev & ~prog_we_o)):
         prog_fragments -= 1
-    
+
+    GPIO.output(PROG_CLK, GPIO.LOW)
+    time.sleep(half_period/2)
+    GPIO.output(PROG_WE, GPIO.LOW)
     GPIO.output(PROG_WE, GPIO.LOW)
     prog_we = 0
-    GPIO.output(PROG_CLK, GPIO.LOW)
     time.sleep(half_period)
 
 def prog_sleep(cycles):
@@ -131,7 +134,7 @@ if (GPIO.input(gpio) == GPIO.HIGH):
         prog_sleep(1)
         compute_fragments()
         print("prog_fragments: %i\n", prog_fragments)
-
+    prog_sleep(100)
     GPIO.output(PROG_DONE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
 
