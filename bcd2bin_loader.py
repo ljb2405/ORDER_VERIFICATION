@@ -133,6 +133,7 @@ if (GPIO.input(gpio) == GPIO.HIGH):
         prog_sleep(1)
         compute_fragments()
         print("prog_fragments: %i\n", prog_fragments)
+    
     prog_sleep(100)
     GPIO.output(PROG_DONE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
