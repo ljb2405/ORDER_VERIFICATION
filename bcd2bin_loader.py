@@ -2,7 +2,7 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-2 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 sleepTime100Cycle = half_period * 2 * 100
 BS_NUM_QWORDS       = 422 # Bitstream length
 BS_WORD_SIZE        = 1 # Byte
@@ -82,11 +82,11 @@ def send_bit(bit):
     elif (~(prog_we_prev & ~prog_we) & (prog_we_o_prev & ~prog_we_o)):
         prog_fragments -= 1
     
-    GPIO.output(PROG_WE, GPIO.LOW)
+    #GPIO.output(PROG_WE, GPIO.LOW)
     GPIO.output(PROG_CLK, GPIO.LOW)
     time.sleep(half_period/2)
-    GPIO.output(PROG_WE, GPIO.LOW)
-    GPIO.output(PROG_WE, GPIO.LOW)
+    #GPIO.output(PROG_WE, GPIO.LOW)
+    #GPIO.output(PROG_WE, GPIO.LOW)
     prog_we = 0
     time.sleep(half_period)
 
@@ -100,7 +100,7 @@ def prog_sleep(cycles):
         time.sleep(half_period)
 
 # Load the bitstream file
-bitstream = open("/home/jae/order/bcd2bin/bitgen.out", "rb")
+bitstream = open("/home/jae/order/bcd2bin/bitgen.out", "r")
 
 GPIO.output(PROG_RST, GPIO.LOW)
 
@@ -112,7 +112,7 @@ while (GPIO.input(gpio) == GPIO.LOW):
 
 if (GPIO.input(gpio) == GPIO.HIGH):
     print("gpio pin set high")
-    byte = bitstream.read(1)
+    byte = int(bitstream.read(2), 16)
     prog_progress = 0
     prog_we = 0
     prog_we_o = GPIO.input(PROG_WE_O)
@@ -120,11 +120,11 @@ if (GPIO.input(gpio) == GPIO.HIGH):
         GPIO.output(PROG_WE, GPIO.HIGH)
     # Send each bit in the byte (assuming MSB first)
         for i in range(7, -1, -1):
-            bit = (byte[0] >> i) & 1
+            bit = (byte >> i) & 1
             send_bit(bit)
-        GPIO.output(PROG_WE, GPIO.LOW)
+        #GPIO.output(PROG_WE, GPIO.LOW)
         prog_progress += BS_WORD_SIZE
-        byte = bitstream.read(1)
+        byte = int(bitstream.read(2), 16)
         # ## Potentially add error checking mechanism using dout?
         prog_sleep(1)
     # Stabilizing Phase

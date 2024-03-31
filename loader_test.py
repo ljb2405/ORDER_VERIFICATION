@@ -61,7 +61,7 @@ def send_bit(bit):
 
     GPIO.output(PROG_CLK, GPIO.HIGH)
 
-    prog_we_o_prev = prog_we_o
+    #prog_we_o_prev = prog_we_o
     prog_we_o = GPIO.input(PROG_WE_O)
     
     time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
@@ -84,8 +84,8 @@ def prog_sleep(cycles):
         time.sleep(half_period)
 
 # Load the bitstream file
-bitstream = open("/home/jae/order/bcd2bin/test_bitgen.out", "rb")
-
+bitstream = open("/home/jae/order/ORDER_VERIFICATION/1_test_bitgen.out", "r")
+prog_sleep(1000)
 GPIO.output(PROG_RST, GPIO.LOW)
 
 # Waits until gpio pin goes high
@@ -96,10 +96,14 @@ while (GPIO.input(gpio) == GPIO.LOW):
 
 if (GPIO.input(gpio) == GPIO.HIGH):
     print("gpio pin set high")
-    byte = bitstream.read(1)
+    byte = int(bitstream.read(2), 16)
+    print("\n", byte)
+    for i in range(7, -1, -1):
+        bit = (byte >> i) & 1
+        print("\n" + str(bit))
     prog_progress = 0
 
-    while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
+    while True:#(prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
         GPIO.output(PROG_WE, GPIO.HIGH)
     # Send each bit in the byte (assuming MSB first)
         for i in range(7, -1, -1):
@@ -107,9 +111,10 @@ if (GPIO.input(gpio) == GPIO.HIGH):
             send_bit(bit)
         GPIO.output(PROG_WE, GPIO.LOW)
         prog_progress += BS_WORD_SIZE
-        byte = bitstream.read(1)
+        #byte = bitstream.read(1)
         # ## Potentially add error checking mechanism using dout?
-        prog_sleep(1)
+        #print("\nWaiting on user response")
+        prog_sleep(2)
     # Stabilizing Phase
 
     while True:
