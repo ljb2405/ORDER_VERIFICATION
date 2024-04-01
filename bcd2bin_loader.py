@@ -114,8 +114,10 @@ if (GPIO.input(gpio) == GPIO.HIGH):
     print("gpio pin set high")
     byte = int(bitstream.read(2), 16)
     prog_progress = 0
-    prog_we = 0
-    prog_we_o = GPIO.input(PROG_WE_O)
+    # prog_we = 0
+    # prog_we_o = GPIO.input(PROG_WE_O)
+    GPIO.output(PROG_WE, GPIO.HIGH)
+    prog_sleep(1)
     while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
         GPIO.output(PROG_WE, GPIO.HIGH)
     # Send each bit in the byte (assuming MSB first)
@@ -134,8 +136,9 @@ if (GPIO.input(gpio) == GPIO.HIGH):
         compute_fragments()
         print("prog_fragments: %i\n", prog_fragments)
     
-    prog_sleep(100)
+    prog_sleep(10000)
     GPIO.output(PROG_DONE, GPIO.HIGH)
+    prog_sleep(10000)
     time.sleep(sleepTime100Cycle)
 
 # Check if programming was successful?

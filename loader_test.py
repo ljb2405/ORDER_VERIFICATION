@@ -2,9 +2,9 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+half_period = 5e-3 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 sleepTime100Cycle = half_period * 2 * 100
-BS_NUM_QWORDS       = 1 # Bitstream length
+BS_NUM_QWORDS       = 422 # Bitstream length
 BS_WORD_SIZE        = 1 # Byte
 # Pin configuration
 # general clock supplied by PWM
@@ -97,30 +97,35 @@ while (GPIO.input(gpio) == GPIO.LOW):
 if (GPIO.input(gpio) == GPIO.HIGH):
     print("gpio pin set high")
     byte = int(bitstream.read(2), 16)
-    print("\n", byte)
-    for i in range(7, -1, -1):
-        bit = (byte >> i) & 1
-        print("\n" + str(bit))
-    prog_progress = 0
 
-    while True:#(prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
-        GPIO.output(PROG_WE, GPIO.HIGH)
+    prog_progress = 0
+    GPIO.output(PROG_WE, GPIO.HIGH)
+    prog_sleep(1)
+    while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
     # Send each bit in the byte (assuming MSB first)
         for i in range(7, -1, -1):
-            bit = (byte[0] >> i) & 1
+            bit = (byte >> i) & 1
             send_bit(bit)
-        GPIO.output(PROG_WE, GPIO.LOW)
+        #input()
+        #GPIO.output(PROG_WE, GPIO.LOW)
         prog_progress += BS_WORD_SIZE
         #byte = bitstream.read(1)
         # ## Potentially add error checking mechanism using dout?
         #print("\nWaiting on user response")
-        prog_sleep(2)
+        #prog_sleep(7)
     # Stabilizing Phase
+    # GPIO.output(PROG_WE, GPIO.HIGH)
+    # prog_sleep()
+    # GPIO.output(PROG_DONE, GPIO.HIGH)
 
+    # Writes 0 after entire bitstrem
+    print("\nWriting done")
+    GPIO.output(PROG_DIN, GPIO.LOW)
+    GPIO.output(PROG_WE, GPIO.HIGH)
     while True:
         prog_sleep(1)
 
-    GPIO.output(PROG_DONE, GPIO.HIGH)
+    # GPIO.output(PROG_DONE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
 
 # Check if programming was successful?
