@@ -2,8 +2,10 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-3 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 sleepTime100Cycle = half_period * 2 * 100
+sleepTime10Cycle = half_period * 2 * 10
+
 BS_NUM_QWORDS       = 422 # Bitstream length
 BS_WORD_SIZE        = 1 # Byte
 # Pin configuration
@@ -100,19 +102,27 @@ if (GPIO.input(gpio) == GPIO.HIGH):
 
     prog_progress = 0
     GPIO.output(PROG_WE, GPIO.HIGH)
-    prog_sleep(1)
-    while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
+    time.sleep(sleepTime100Cycle)
+    #prog_sleep(1)
+    while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 64):
+        GPIO.output(PROG_WE, GPIO.HIGH)
+        time.sleep(sleepTime10Cycle)
     # Send each bit in the byte (assuming MSB first)
-        for i in range(7, -1, -1):
-            bit = (byte >> i) & 1
-            send_bit(bit)
-        #input()
-        #GPIO.output(PROG_WE, GPIO.LOW)
+        # for i in range(7, -1, -1):
+        #     bit = (byte >> i) & 1
+        #     send_bit(bit)
+        prog_sleep(2)
+        #time.sleep(sleepTime10Cycle)
+        #time.sleep(sleepTime10Cycle)
+        GPIO.output(PROG_WE, GPIO.LOW)
+        #time.sleep(sleepTime10Cycle)
         prog_progress += BS_WORD_SIZE
+        #time.sleep(sleepTime10Cycle)
         #byte = bitstream.read(1)
         # ## Potentially add error checking mechanism using dout?
         #print("\nWaiting on user response")
-        #prog_sleep(7)
+        prog_sleep(2)
+        #time.sleep(sleepTime10Cycle)
     # Stabilizing Phase
     # GPIO.output(PROG_WE, GPIO.HIGH)
     # prog_sleep()
