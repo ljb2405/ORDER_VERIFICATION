@@ -37,9 +37,10 @@ The file tree is as such:
     ├── loader_test.py
     └── test.py
 ```
-/bcd2bin dirctory contains bitstream and other Verilog files related to sample application of bcd2bin
-/build directory contains scripts to load the bcd2bin bitstream into ORDER and test the properly loaded ORDER FPGA.
-/riscv_build directory contains files to properly set the user IOs of the FPGA by using the RISC-V CPU. 
+- /bcd2bin dirctory contains bitstream and other Verilog files related to sample application of bcd2bin
+- /build directory contains scripts to load the bcd2bin bitstream into ORDER and test the properly loaded ORDER FPGA.
+- /riscv_build directory contains files to properly set the user IOs of the FPGA by using the RISC-V CPU.
+-  
 
 ## Bitstream Programming
 
