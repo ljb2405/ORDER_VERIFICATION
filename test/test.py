@@ -1,8 +1,11 @@
+## Test Python script to read the test file
+## and prints each bit to the terminal
+
 import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Load the bitstream file
-bitstream = open("/home/jae/order/ORDER_VERIFICATION/1_test_bitgen.out", "r")
+bitstream = open("../sample_tests/1_test_bitgen.out", "r")
 byte = int(bitstream.read(2), 16)
 print("\n", byte)
 

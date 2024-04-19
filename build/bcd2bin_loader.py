@@ -1,15 +1,21 @@
+"""Script to load the bitstream into ORDER FPGA"""
+
 import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
-sleepTime100Cycle = half_period * 2 * 100
-BS_NUM_QWORDS       = 422 # Bitstream length
+half_period = 5e-5 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+sleepTime100Cycle = half_period * 2 * 100 # Computer sleep for 100 cycles of clock
+sleepTime10Cycle = half_period * 2 * 10 # Computer sleep for 10 cycles of clock
+
+BS_NUM_QWORDS       = 422 # Bitstream length of bcd2bin
 BS_WORD_SIZE        = 1 # Byte
+
 # Pin configuration
 # general clock supplied by PWM
 # P8.19 corresponds to folder: /sys/class/pwm/pwmchip7/pwm-7:1
 # clock is dealt in PWM with clock.sh
+
 PROG_CLK = "P8_13"
 PROG_RST = "P8_7"
 PROG_DONE = "P8_8"
@@ -18,13 +24,6 @@ PROG_DIN = "P8_10"
 PROG_DOUT = "P8_11"
 PROG_WE_O = "P8_12"
 gpio = "P8_14"
-
-# Global Variables
-prog_fragments = 0
-prog_we = 0
-prog_we_prev = 0
-prog_we_o = 0
-prog_we_o_prev = 0
 
 # Setup GPIO
 GPIO.setup(PROG_CLK, GPIO.OUT)
@@ -42,70 +41,39 @@ GPIO.output(PROG_DONE, GPIO.LOW)
 GPIO.output(PROG_WE, GPIO.LOW)
 GPIO.output(PROG_CLK, GPIO.LOW)
 
-# Computes prog_fragment for programming stabilization purposes
-def compute_fragments():
-    global prog_we
-    global prog_we_prev
-    global prog_we_o
-    global prog_we_o_prev
-    global prog_fragments
-
-    prog_we_prev = prog_we
-    prog_we_o_prev = prog_we_o
-    prog_we_o = GPIO.input(PROG_WE_O)
-
-    if ((prog_we_prev and ~prog_we) and ~(prog_we_o_prev and ~prog_we_o)):
-        prog_fragments += 1
-    elif (~(prog_we_prev and ~prog_we) and (prog_we_o_prev and ~prog_we_o)):
-        prog_fragments -= 1
-    
-# Function to send a single bit to the FPGA
+"""Function to send one bit of bitstream to the FPGA"""
 def send_bit(bit):
-    global prog_we
-    global prog_we_prev
-    global prog_we_o
-    global prog_we_o_prev
-    global prog_fragments
-
+    # Sets the data bit
     GPIO.output(PROG_DIN, bit)
-    prog_we_prev = prog_we
 
+    # Causes rising edge of the clock
     GPIO.output(PROG_CLK, GPIO.HIGH)
-
-    prog_we_o_prev = prog_we_o
-    prog_we_o = GPIO.input(PROG_WE_O)
-    
     time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
-
-    if ((prog_we_prev & ~prog_we) & ~(prog_we_o_prev & ~prog_we_o)):
-        prog_fragments += 1
-    elif (~(prog_we_prev & ~prog_we) & (prog_we_o_prev & ~prog_we_o)):
-        prog_fragments -= 1
     
-    #GPIO.output(PROG_WE, GPIO.LOW)
+    # Clock goes low
     GPIO.output(PROG_CLK, GPIO.LOW)
-    time.sleep(half_period/2)
-    #GPIO.output(PROG_WE, GPIO.LOW)
-    #GPIO.output(PROG_WE, GPIO.LOW)
-    prog_we = 0
-    time.sleep(half_period)
+    time.sleep(half_period) # Adjust based on your FPGA's clock requirements
 
-def prog_sleep(cycles):
+"""Sends clock signal for the inputted amount of cycles
+Argument 1: cycles - specifies the number of cycles that the chip will execute for
+Argument 2: high_factor - specifies how the factor that the clock will be high compared to the clock low"""
+def prog_sleep(cycles, high_factor):
     count = 0
     while (count < cycles):
         GPIO.output(PROG_CLK, GPIO.HIGH)
         count += 1
-        time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
+        time.sleep(half_period * high_factor)  # Adjust based on your FPGA's clock requirements
         GPIO.output(PROG_CLK, GPIO.LOW)
         time.sleep(half_period)
 
 # Load the bitstream file
-bitstream = open("/home/jae/order/bcd2bin/bitgen.out", "r")
+bitstream = open("../bcd2bin/bitgen.out", "r")
 
+# Reset goes low
+prog_sleep(10000, 1)
 GPIO.output(PROG_RST, GPIO.LOW)
 
 # Waits until gpio pin goes high
-# Should not be needed
 while (GPIO.input(gpio) == GPIO.LOW):
     time.sleep(1)
 
@@ -114,8 +82,6 @@ if (GPIO.input(gpio) == GPIO.HIGH):
     print("gpio pin set high")
     byte = int(bitstream.read(2), 16)
     prog_progress = 0
-    # prog_we = 0
-    # prog_we_o = GPIO.input(PROG_WE_O)
     GPIO.output(PROG_WE, GPIO.HIGH)
     prog_sleep(1)
     while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 8):
@@ -124,25 +90,16 @@ if (GPIO.input(gpio) == GPIO.HIGH):
         for i in range(7, -1, -1):
             bit = (byte >> i) & 1
             send_bit(bit)
-        #GPIO.output(PROG_WE, GPIO.LOW)
         prog_progress += BS_WORD_SIZE
         byte = int(bitstream.read(2), 16)
         # ## Potentially add error checking mechanism using dout?
         prog_sleep(1)
-    # Stabilizing Phase
-
-    while (prog_fragments > 0):
-        prog_sleep(1)
-        compute_fragments()
-        print("prog_fragments: %i\n", prog_fragments)
     
+    GPIO.output(PROG_WE, GPIO.LOW)
     prog_sleep(10000)
     GPIO.output(PROG_DONE, GPIO.HIGH)
     prog_sleep(10000)
     time.sleep(sleepTime100Cycle)
-
-# Check if programming was successful?
-# Possibly utilize prog_dout / prog_we_o
 
 
 if GPIO.input(PROG_DONE):

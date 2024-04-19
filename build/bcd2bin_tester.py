@@ -86,7 +86,6 @@ w_test_bin_3 = "P9_18"
 w_test_bin_2 = "P9_20"
 w_test_bin_1 = "P9_22"
 w_test_bin_0 = "P9_24"
-#w_test_bin_7 = "P8_36" 
 
 # List
 bcd_pins_digit0 = [w_test_bcd0_0, w_test_bcd0_1, w_test_bcd0_2, w_test_bcd0_3]
@@ -141,63 +140,9 @@ GPIO.output(w_test_bcd1_3, GPIO.LOW)
 
 time.sleep(sleepTime100Cycle)
 
-# Reset goes LOW
-# GPIO.output(w_test_reset, GPIO.LOW)
-
 # Test Cases
 ## Test Case 0: BCD: {4'd0, 4'd0} BIN: 7'h00
 test_bcd_to_bin(0, 0, 0)
-# print("\nTest Case 0: BCD: {4'd0, 4'd0} BIN: 7'h00\n")
-
-# # Set BCD INPUTS
-# GPIO.output(w_test_bcd0_0, GPIO.LOW)
-# GPIO.output(w_test_bcd0_1, GPIO.LOW)
-# GPIO.output(w_test_bcd0_2, GPIO.LOW)
-# GPIO.output(w_test_bcd0_3, GPIO.LOW)
-# GPIO.output(w_test_bcd1_0, GPIO.LOW)
-# GPIO.output(w_test_bcd1_1, GPIO.LOW)
-# GPIO.output(w_test_bcd1_2, GPIO.LOW)
-# GPIO.output(w_test_bcd1_3, GPIO.LOW)
-# time.sleep(sleepTime100Cycle)
-
-# # Low the reset
-# GPIO.output(w_test_reset, GPIO.LOW)
-# time.sleep(sleepTime100Cycle)
-
-# # If ready, start
-# print("\nWaiting for rdy signal...\n")
-# while (GPIO.input(w_impl_ready) == GPIO.LOW):
-#     time.sleep(sleepTimeOneCycle)
-
-# print("\nStarting Test Case 1\n")
-# GPIO.output(w_test_start, GPIO.HIGH)
-# GPIO.output(w_test_start, GPIO.HIGH)
-# time.sleep(sleepTimeOneCycle)
-# GPIO.output(w_test_start, GPIO.LOW)
-# GPIO.output(w_test_start, GPIO.LOW)
-
-# # Wait until the operation is over
-# print("\nTest Case Running...\n")
-# while (GPIO.input(w_impl_done_tick) == GPIO.LOW):
-#     time.sleep(sleepTime100Cycle)
-
-# if (GPIO.input(w_test_bin_0) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[0]\n")
-# if (GPIO.input(w_test_bin_1) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[1]\n")
-# if (GPIO.input(w_test_bin_2) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[2]\n")
-# if (GPIO.input(w_test_bin_3) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[3]\n")
-# if (GPIO.input(w_test_bin_4) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[4]\n")
-# if (GPIO.input(w_test_bin_5) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[5]\n")
-# if (GPIO.input(w_test_bin_6) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[6]\n")
-# if (GPIO.input(w_test_bin_7) != GPIO.LOW):
-#     print("\nTest Case 0 Failed: Wrong bin[7]\n")
-
 ## Test Case 1: BCD: {4'd9, 4'd9} BIN: 7'h63
 test_bcd_to_bin(9, 9, 0x63)
 ## Test Case 2: BCD: {4'd5, 4'd5} BIN: 7'h37
