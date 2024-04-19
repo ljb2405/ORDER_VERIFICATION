@@ -2,7 +2,7 @@ import Adafruit_BBIO.GPIO as GPIO
 import time
 
 # Parameters
-half_period = 5e-4 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
+half_period = 5e-5 # 10 kHz --> In reality, something lower than 10 KHz because of how Python runs
 sleepTime100Cycle = half_period * 2 * 100
 sleepTime10Cycle = half_period * 2 * 10
 
@@ -76,18 +76,18 @@ def send_bit(bit):
     GPIO.output(PROG_CLK, GPIO.LOW)
     time.sleep(half_period)
 
-def prog_sleep(cycles):
+def prog_sleep(cycles, high_factor):
     count = 0
     while (count < cycles):
         GPIO.output(PROG_CLK, GPIO.HIGH)
         count += 1
-        time.sleep(half_period)  # Adjust based on your FPGA's clock requirements
+        time.sleep(half_period * high_factor)  # Adjust based on your FPGA's clock requirements
         GPIO.output(PROG_CLK, GPIO.LOW)
         time.sleep(half_period)
 
 # Load the bitstream file
 bitstream = open("/home/jae/order/ORDER_VERIFICATION/1_test_bitgen.out", "r")
-prog_sleep(1000)
+prog_sleep(1000, 1)
 GPIO.output(PROG_RST, GPIO.LOW)
 
 # Waits until gpio pin goes high
@@ -104,25 +104,29 @@ if (GPIO.input(gpio) == GPIO.HIGH):
     GPIO.output(PROG_WE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
     #prog_sleep(1)
-    while (prog_progress + BS_WORD_SIZE < BS_NUM_QWORDS * 64):
+    while (prog_progress < 1):
         GPIO.output(PROG_WE, GPIO.HIGH)
-        time.sleep(sleepTime10Cycle)
+        time.sleep(sleepTime100Cycle)
+        prog_sleep(100, 1)
+        #time.sleep(sleepTime10Cycle)
+        #GPIO.output(PROG_WE, GPIO.HIGH)
+        #time.sleep(sleepTime10Cycle)
     # Send each bit in the byte (assuming MSB first)
         # for i in range(7, -1, -1):
         #     bit = (byte >> i) & 1
         #     send_bit(bit)
-        prog_sleep(2)
+        #prog_sleep(4, 1)
         #time.sleep(sleepTime10Cycle)
         #time.sleep(sleepTime10Cycle)
         GPIO.output(PROG_WE, GPIO.LOW)
-        #time.sleep(sleepTime10Cycle)
+        time.sleep(sleepTime100Cycle)
         prog_progress += BS_WORD_SIZE
         #time.sleep(sleepTime10Cycle)
         #byte = bitstream.read(1)
         # ## Potentially add error checking mechanism using dout?
         #print("\nWaiting on user response")
-        prog_sleep(2)
-        #time.sleep(sleepTime10Cycle)
+        prog_sleep(10, 1)
+        time.sleep(sleepTime100Cycle)
     # Stabilizing Phase
     # GPIO.output(PROG_WE, GPIO.HIGH)
     # prog_sleep()
@@ -130,10 +134,10 @@ if (GPIO.input(gpio) == GPIO.HIGH):
 
     # Writes 0 after entire bitstrem
     print("\nWriting done")
-    GPIO.output(PROG_DIN, GPIO.LOW)
-    GPIO.output(PROG_WE, GPIO.HIGH)
+    # GPIO.output(PROG_DIN, GPIO.LOW)
+    # GPIO.output(PROG_WE, GPIO.HIGH)
     while True:
-        prog_sleep(1)
+        prog_sleep(1, 1)
 
     # GPIO.output(PROG_DONE, GPIO.HIGH)
     time.sleep(sleepTime100Cycle)
